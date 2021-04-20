@@ -5,19 +5,20 @@ var z = require('zero-fill')
   , Asset_currency = require('../../../lib/engine')
 
 module.exports = {
-  name: 'rsi',
+  name: 'retrend_rsi',
   description: 'Attempts to buy low and sell high by tracking RSI high-water readings.',
 
   getOptions: function () {
     this.option('period', 'period length, same as --period_length', String, '2m')
     this.option('period_length', 'period length, same as --period', String, '2m')
     this.option('min_periods', 'min. number of history periods', Number, 52)
-    this.option('rsi_periods', 'number of RSI periods', Number, 14)
-    this.option('oversold_rsi', 'buy when RSI reaches or drops below this value', Number, 30)
-    this.option('overbought_rsi', 'sell when RSI reaches or goes above this value', Number, 82)
+    this.option('rsi_periods', 'number of RSI periods', Number, 4)
+    this.option('max_buy_rsi', 'only buy when RSI is below this value', Number, 60)
+    this.option('min_sell_rsi', 'will not sell when RSI is under this value', Number, 40)
     this.option('rsi_recover', 'allow RSI to recover this many points before buying', Number, 3)
     this.option('rsi_drop', 'allow RSI to fall this many points before selling', Number, 0)
     this.option('rsi_divisor', 'sell when RSI reaches high-water reading divided by this value', Number, 2)
+	  this.option('flat_tolerance', 'Difference from when the price is considered to be rising or falling', Number, 0)
   },
 
   calculate: function (s) {
@@ -27,38 +28,71 @@ module.exports = {
   onPeriod: function (s, cb) {
     if (s.in_preroll) return cb()
     if (typeof s.period.rsi === 'number') {
-      if (s.trend === undefined && s.period.rsi <= s.options.oversold_rsi) {
+      if (s.trend === undefined) {
         s.rsi_low = s.period.rsi
-        s.trend = 'oversold'
+        s.trend = 'flat'
       }
-      if (s.trend === 'oversold' || s.asset_capital > 0) {
-        s.rsi_low = Math.min(s.rsi_low, s.period.rsi)
-        if (s.period.rsi >= s.rsi_low + s.options.rsi_recover) {
-          s.trend = 'long'
-          s.signal = 'buy'
-          s.rsi_high = s.period.rsi
+	  
+      //rising trend
+      if (s.trend === 'rising') {
+        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) { //maybe lookback[1] for rising/falling ?
+          //still rising
+          //keep calm! There is more!
+          s.trend = 'rising'
+        } 
+        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+          //from rising to down
+          //time to sell
+          s.trend = 'down'
+          //only sell if RSI > min_sell_rsi
+          if (s.period.rsi > s.options.min_sell_rsi)
+            s.signal = 'sell'
         }
-      }
-      if (s.trend !== 'oversold' && s.trend !== 'long' && s.period.rsi >= s.options.overbought_rsi) {
-        s.rsi_high = s.period.rsi
-        s.trend = 'long'
-      }
-      if (s.trend === 'long' || s.currency_capital > 0) {
-        s.rsi_high = Math.max(s.rsi_high, s.period.rsi)
-        if (s.period.rsi <= s.rsi_high / s.options.rsi_divisor) {
-          s.trend = 'short'
-          s.signal = 'sell'
+      } else
+      //up trend
+      if (s.trend === 'up') {
+        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+          //from up to rising
+          s.trend = 'rising'
         }
-      }
-      if (s.trend === 'long' && s.period.rsi >= s.options.overbought_rsi) {
-        s.rsi_high = s.period.rsi
-        s.trend = 'overbought'
-      }
-      if (s.trend === 'overbought' || s.currency_capital > 0) {
-        s.rsi_high = Math.max(s.rsi_high, s.period.rsi)
-        if (s.period.rsi <= s.rsi_high - s.options.rsi_drop) {
-          s.trend = 'short'
-          s.signal = 'sell'
+        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+          //from up to down
+          s.trend = 'down'
+        }
+      } else
+      //flat trend
+      if (s.trend === 'flat') {
+        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+          s.trend = 'up'
+        }
+        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+          s.trend = 'down'
+        }
+      } 
+      if (s.trend === 'down') {
+        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+          //from down to up
+          s.trend = 'up'
+        }
+        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+          //from down to falling
+          s.trend = 'falling'
+        }
+      } else 
+      //falling trend
+      if (s.trend === 'falling') {
+        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+          //from falling to up
+          //time to buy
+          s.trend = 'up'
+          //only buy if RSI < max_buy_rsi
+          if (s.period.rsi < s.options.max_buy_rsi)
+            s.signal = 'buy'
+        }
+        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+          //still falling
+          //keep calm!
+          s.trend = 'down'
         }
       }
     }
@@ -69,10 +103,10 @@ module.exports = {
     var cols = []
     if (typeof s.period.rsi === 'number') {
       var color = 'grey'
-      if (s.period.rsi <= s.options.oversold_rsi) {
+      if (s.trend === 'falling' && s.period.rsi > s.lookback[0].rsi) {
         color = 'green'
       }
-      if (s.period.rsi >= s.options.overbought_rsi) {
+      if (s.trend === 'rising' && s.period.rsi > s.lookback[0].rsi) {
         color = 'red'
       }
       cols.push(z(4, n(s.period.rsi).format('0'), ' ')[color])
