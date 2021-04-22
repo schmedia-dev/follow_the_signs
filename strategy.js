@@ -87,6 +87,24 @@ module.exports = {
           //keep calm!
         }
       }
+
+      // trend changed from falling to up
+      if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+        // time to buy
+        if (s.options.debug) { console.log('\n== time to buy ==')}
+        // only buy if RSI < max_buy_rsi
+        if (s.period.rsi < s.options.max_buy_rsi)
+          s.signal = 'buy'
+      }
+
+      // trend changed from rising to falling
+      if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+        //time to sell
+        if (s.options.debug) { console.log('\n== time to sell ==')}
+        //only sell if RSI > min_sell_rsi
+        if (s.period.rsi > s.options.min_sell_rsi)
+          s.signal = 'sell'
+      }
     }
     cb()
   },
