@@ -98,7 +98,7 @@ module.exports = {
       }
 
       // trend changed from rising to falling
-      if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+      if (s.lookback[0].trend == 'rising' && s.trend == 'down') {
         //time to sell
         if (s.options.debug) { console.log('\n== time to sell ==')}
         //only sell if RSI > min_sell_rsi
@@ -106,7 +106,6 @@ module.exports = {
           s.signal = 'sell'
       }
     }
-    console.log(s.trend)
     cb()
   },
 
@@ -121,6 +120,7 @@ module.exports = {
         color = 'red'
       }
       cols.push(z(4, n(s.period.rsi).format('0'), ' ')[color])
+      cols.push(s.trend)
     }
     return cols
   },
