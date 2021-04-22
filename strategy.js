@@ -24,6 +24,29 @@ module.exports = {
   calculate: function (s) {
     rsi(s, 'rsi', s.options.rsi_periods)
 
+      
+    // trend changed from falling to up
+    if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+      // time to buy
+      if (s.options.debug) { console.log('\n== time to buy ==')}
+      // only buy if RSI < max_buy_rsi
+      if (s.period.rsi < s.options.max_buy_rsi)
+        s.signal = 'buy'
+    }
+
+    // trend changed from rising to falling
+    if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+      //time to sell
+      if (s.options.debug) { console.log('\n== time to sell ==')}
+      //only sell if RSI > min_sell_rsi
+      if (s.period.rsi > s.options.min_sell_rsi)
+        s.signal = 'sell'
+    }
+  },
+
+  onPeriod: function (s, cb) {
+    if (s.in_preroll) return cb()
+
     // calculate trend
     if (typeof s.period.rsi === 'number') {
       // at start trend is undefined
@@ -83,31 +106,10 @@ module.exports = {
           //keep calm!
         }
       }
+        
+      if (s.options.debug) { console.log('\n== Trend: ' + s.trend + ' ==')}
 
     }
-  },
-
-  onPeriod: function (s, cb) {
-    if (s.in_preroll) return cb()
-    // trend changed from falling to up
-	  if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
-      // time to buy
-      if (s.options.debug) { console.log('\n== time to buy ==')}
-      // only buy if RSI < max_buy_rsi
-      if (s.period.rsi < s.options.max_buy_rsi)
-        s.signal = 'buy'
-    }
-
-    // trend changed from rising to falling
-	  if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
-      //time to sell
-      if (s.options.debug) { console.log('\n== time to sell ==')}
-      //only sell if RSI > min_sell_rsi
-      if (s.period.rsi > s.options.min_sell_rsi)
-        s.signal = 'sell'
-    }
-      
-    if (s.options.debug) { console.log('\n== trend: ' + s.trend + ' ==')}
     cb()
   },
 
