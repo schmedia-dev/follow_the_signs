@@ -93,7 +93,7 @@ module.exports = {
         // time to buy
         if (s.options.debug) { console.log('\n== time to buy ==')}
         // only buy if RSI < max_buy_rsi
-        if (s.period.rsi < s.options.max_buy_rsi)
+        if (s.lookback[0].rsi < s.options.max_buy_rsi)
           s.signal = 'buy'
       }
 
@@ -102,7 +102,7 @@ module.exports = {
         //time to sell
         if (s.options.debug) { console.log('\n== time to sell ==')}
         //only sell if RSI > min_sell_rsi
-        if (s.period.rsi > s.options.min_sell_rsi)
+        if (s.lookback[0].rsi > s.options.min_sell_rsi)
           s.signal = 'sell'
       }
     }
