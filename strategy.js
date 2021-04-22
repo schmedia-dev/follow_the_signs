@@ -116,10 +116,10 @@ module.exports = {
     var cols = []
     if (typeof s.period.rsi === 'number') {
       var color = 'grey'
-      if (s.trend === 'falling' && s.period.rsi > s.lookback[0].rsi) {
+      if (s.trend === 'falling' && s.period.rsi < s.options.max_buy_rsi && s.period.rsi > s.lookback[0].rsi) {
         color = 'green'
       }
-      if (s.trend === 'rising' && s.period.rsi > s.lookback[0].rsi) {
+      if (s.trend === 'rising' && s.period.rsi > s.options.min_sell_rsi && s.period.rsi < s.lookback[0].rsi) {
         color = 'red'
       }
       cols.push(z(4, n(s.period.rsi).format('0'), ' ')[color])
