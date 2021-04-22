@@ -24,7 +24,7 @@ module.exports = {
   calculate: function (s) {
     rsi(s, 'rsi', s.options.rsi_periods)
 
-    if (s.lookback[0].trend != undefined && s.trend != undefined) {
+    if (s.lookback[0].trend !== undefined && s.trend !== undefined) {
       // trend changed from falling to up
       if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
         // time to buy
