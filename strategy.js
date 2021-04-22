@@ -92,7 +92,6 @@ module.exports = {
         if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
           //still falling
           //keep calm!
-          s.trend = 'down'
         }
       }
     }
