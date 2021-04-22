@@ -12,11 +12,11 @@ module.exports = {
     this.option('period', 'period length, same as --period_length', String, '2m')
     this.option('period_length', 'period length, same as --period', String, '2m')
     this.option('min_periods', 'min. number of history periods', Number, 52)
-    this.option('rsi_periods', 'number of RSI periods', Number, 4)
+    this.option('rsi_periods', 'number of RSI periods', Number, 7)
     this.option('max_buy_rsi', 'only buy when RSI is below this value', Number, 40)
     this.option('min_sell_rsi', 'will not sell when RSI is under this value', Number, 60)
-    this.option('rsi_recover', 'allow RSI to recover this many points before buying', Number, 3)
-    this.option('rsi_drop', 'allow RSI to fall this many points before selling', Number, 0)
+    this.option('rsi_recover', 'allow RSI to recover this many points before buying', Number, 1)
+    this.option('rsi_drop', 'allow RSI to fall this many points before selling', Number, 1)
     this.option('rsi_divisor', 'sell when RSI reaches high-water reading divided by this value', Number, 2)
 	  this.option('flat_tolerance', 'Difference from when the price is considered to be rising or falling', Number, 0)
   },
@@ -45,6 +45,10 @@ module.exports = {
         if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
           //from rising to down
           //time to sell
+          //only sell if RSI > min_sell_rsi
+          if (s.lookback[0].rsi > s.options.min_sell_rsi) {
+            s.signal = 'sell'
+          }
           s.trend = 'down'
         }
       } else if (s.trend === 'up') {
@@ -80,6 +84,10 @@ module.exports = {
         if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
           //from falling to up
           //time to buy
+          // only buy if RSI < max_buy_rsi
+          if (s.lookback[0].rsi < s.options.max_buy_rsi) {
+            s.signal = 'buy'
+          }
           s.trend = 'up'
         }
         if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
@@ -90,20 +98,10 @@ module.exports = {
 
       // trend changed from falling to up
       if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
-        // time to buy
-        if (s.options.debug) { console.log('\n== time to buy ==')}
-        // only buy if RSI < max_buy_rsi
-        if (s.lookback[0].rsi < s.options.max_buy_rsi)
-          s.signal = 'buy'
       }
 
       // trend changed from rising to falling
       if (s.lookback[0].trend == 'rising' && s.trend == 'down') {
-        //time to sell
-        if (s.options.debug) { console.log('\n== time to sell ==')}
-        //only sell if RSI > min_sell_rsi
-        if (s.lookback[0].rsi > s.options.min_sell_rsi)
-          s.signal = 'sell'
       }
     }
     cb()
@@ -120,7 +118,6 @@ module.exports = {
         color = 'red'
       }
       cols.push(z(4, n(s.period.rsi).format('0'), ' ')[color])
-      cols.push(s.trend)
     }
     return cols
   },
