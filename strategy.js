@@ -92,10 +92,10 @@ module.exports = {
 
   onPeriod: function (s, cb) {
     if (s.in_preroll) return cb()
-    
     // trend changed from falling to up
 	  if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
       // time to buy
+      if (s.options.debug) { console.log('\n== time to buy ==')}
       // only buy if RSI < max_buy_rsi
       if (s.period.rsi < s.options.max_buy_rsi)
         s.signal = 'buy'
@@ -104,11 +104,13 @@ module.exports = {
     // trend changed from rising to falling
 	  if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
       //time to sell
+      if (s.options.debug) { console.log('\n== time to sell ==')}
       //only sell if RSI > min_sell_rsi
       if (s.period.rsi > s.options.min_sell_rsi)
         s.signal = 'sell'
-  }
+    }
       
+    if (s.options.debug) { console.log('\n== trend: ' + s.trend + ' ==')}
     cb()
   },
 
@@ -116,10 +118,10 @@ module.exports = {
     var cols = []
     if (typeof s.period.rsi === 'number') {
       var color = 'grey'
-      if (s.trend === 'falling' && s.period.rsi < s.options.max_buy_rsi && s.period.rsi > s.lookback[0].rsi) {
+      if (s.trend === 'falling' && s.period.rsi < s.options.max_buy_rsi ) {
         color = 'green'
       }
-      if (s.trend === 'rising' && s.period.rsi > s.options.min_sell_rsi && s.period.rsi < s.lookback[0].rsi) {
+      if (s.trend === 'rising' && s.period.rsi > s.options.min_sell_rsi ) {
         color = 'red'
       }
       cols.push(z(4, n(s.period.rsi).format('0'), ' ')[color])
