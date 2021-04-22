@@ -23,30 +23,25 @@ module.exports = {
 
   calculate: function (s) {
     rsi(s, 'rsi', s.options.rsi_periods)
-  },
 
-  onPeriod: function (s, cb) {
-    if (s.in_preroll) return cb()
+    // calculate trend
     if (typeof s.period.rsi === 'number') {
+      // at start trend is undefined
       if (s.trend === undefined) {
         s.rsi_low = s.period.rsi
         s.trend = 'flat'
       }
-	  
-      //rising trend
+
+      // rising trend
       if (s.trend === 'rising') {
         if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) { //maybe lookback[1] for rising/falling ?
           //still rising
           //keep calm! There is more!
-          s.trend = 'rising'
         } 
         if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
           //from rising to down
           //time to sell
           s.trend = 'down'
-          //only sell if RSI > min_sell_rsi
-          if (s.period.rsi > s.options.min_sell_rsi)
-            s.signal = 'sell'
         }
       } else
       //up trend
@@ -85,16 +80,35 @@ module.exports = {
           //from falling to up
           //time to buy
           s.trend = 'up'
-          //only buy if RSI < max_buy_rsi
-          if (s.period.rsi < s.options.max_buy_rsi)
-            s.signal = 'buy'
         }
         if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
           //still falling
           //keep calm!
         }
       }
+
     }
+  },
+
+  onPeriod: function (s, cb) {
+    if (s.in_preroll) return cb()
+    
+    // trend changed from falling to up
+	  if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+      // time to buy
+      // only buy if RSI < max_buy_rsi
+      if (s.period.rsi < s.options.max_buy_rsi)
+        s.signal = 'buy'
+    }
+
+    // trend changed from rising to falling
+	  if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
+      //time to sell
+      //only sell if RSI > min_sell_rsi
+      if (s.period.rsi > s.options.min_sell_rsi)
+        s.signal = 'sell'
+  }
+      
     cb()
   },
 
