@@ -106,6 +106,7 @@ module.exports = {
           s.signal = 'sell'
       }
     }
+    console.log(s.trend)
     cb()
   },
 
