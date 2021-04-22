@@ -95,14 +95,6 @@ module.exports = {
           //keep calm!
         }
       }
-
-      // trend changed from falling to up
-      if (s.lookback[0].trend == 'falling' && s.trend == 'up') {
-      }
-
-      // trend changed from rising to falling
-      if (s.lookback[0].trend == 'rising' && s.trend == 'down') {
-      }
     }
     cb()
   },
