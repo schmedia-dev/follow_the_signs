@@ -43,9 +43,8 @@ module.exports = {
           //time to sell
           s.trend = 'down'
         }
-      } else
-      //up trend
-      if (s.trend === 'up') {
+      } else if (s.trend === 'up') {
+        //up trend
         if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
           //from up to rising
           s.trend = 'rising'
@@ -54,17 +53,16 @@ module.exports = {
           //from up to down
           s.trend = 'down'
         }
-      } else
-      //flat trend
-      if (s.trend === 'flat') {
+      } else if (s.trend === 'flat') {
+        //flat trend
         if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
           s.trend = 'up'
         }
         if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
           s.trend = 'down'
         }
-      } 
-      if (s.trend === 'down') {
+      } else if (s.trend === 'down') {
+        // down trend
         if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
           //from down to up
           s.trend = 'up'
@@ -73,9 +71,8 @@ module.exports = {
           //from down to falling
           s.trend = 'falling'
         }
-      } else 
-      //falling trend
-      if (s.trend === 'falling') {
+      } else if (s.trend === 'falling') {
+        //falling trend
         if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
           //from falling to up
           //time to buy
