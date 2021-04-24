@@ -26,73 +26,69 @@ module.exports = {
   },
 
   onPeriod: function (s, cb) {
-    if (s.in_preroll) return cb()
-
-    // calculate trend
-    if (typeof s.period.rsi === 'number') {
-      // at start trend is undefined
-      if (s.trend === undefined) {
-        s.rsi_low = s.period.rsi
-        s.trend = 'flat'
-      }
-
-      // rising trend
-      if (s.trend === 'rising') {
-        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) { //maybe lookback[1] for rising/falling ?
-          //still rising
-          //keep calm! There is more!
-        } 
-        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
-          //from rising to down
-          //time to sell
-          //only sell if RSI > min_sell_rsi
-          if (s.lookback[0].rsi > s.options.min_sell_rsi) {
-            s.signal = 'sell'
-          }
-          s.trend = 'down'
-        }
-      } else if (s.trend === 'up') {
-        //up trend
-        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
-          //from up to rising
-          s.trend = 'rising'
-        }
-        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
-          //from up to down
-          s.trend = 'down'
-        }
-      } else if (s.trend === 'flat') {
-        //flat trend
-        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
-          s.trend = 'up'
-        }
-        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
-          s.trend = 'down'
-        }
-      } else if (s.trend === 'down') {
-        // down trend
-        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
-          //from down to up
-          s.trend = 'up'
-        }
-        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
-          //from down to falling
-          s.trend = 'falling'
-        }
-      } else if (s.trend === 'falling') {
-        //falling trend
-        if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
-          //from falling to up
-          //time to buy
-          // only buy if RSI < max_buy_rsi
-          if (s.lookback[0].rsi < s.options.max_buy_rsi) {
-            s.signal = 'buy'
-          }
-          s.trend = 'up'
-        }
-        if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
-          //still falling
-          //keep calm!
+    if (!s.in_preroll) {
+      // calculate trend
+      if (typeof s.period.rsi === 'number') {
+   
+        switch (s.trend) {
+          case 'rising':
+            if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+              //maybe lookback[1] for rising/falling ?
+              //still rising
+              //keep calm! There is more!
+            }
+            if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+              //from rising to down
+              //time to sell
+              if (s.lookback[0].rsi > s.options.min_sell_rsi) {
+                // but only sell if RSI > min_sell_rsi
+                s.signal = 'sell'
+              }
+              s.trend = 'down'
+            }
+            break
+          case 'up':
+            if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+              //from up to rising
+              s.trend = 'rising'
+            } else if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+              //from up to down
+              s.trend = 'down'
+            }
+            break
+          case 'down':
+            if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+              //from down to up
+              s.trend = 'up'
+            } else if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+              //from down to falling
+              s.trend = 'falling'
+            }
+            break
+          case 'falling':
+            if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+              //from falling to up
+              //time to buy
+              if (s.lookback[0].rsi < s.options.max_buy_rsi) {
+                // only buy if RSI < max_buy_rsi
+                s.signal = 'buy'
+              }
+              s.trend = 'up'
+            }
+            if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+              //still falling
+              //keep calm!
+            }
+            break
+          case 'flat':
+          default:
+            if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
+              s.trend = 'up'
+            }
+            if (s.period.rsi < s.lookback[0].rsi - s.options.flat_tolerance) {
+              s.trend = 'down'
+            }
+            break
         }
       }
     }
