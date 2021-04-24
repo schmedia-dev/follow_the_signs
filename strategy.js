@@ -42,7 +42,11 @@ module.exports = {
               //time to sell
               if (s.lookback[0].rsi > s.options.min_sell_rsi) {
                 // but only sell if RSI > min_sell_rsi
-                s.signal = 'sell'
+                if ((s.last_signal === 'sell' && s.lookback[0].close < s.period.close) || s.last_signal !== 'sell') {
+                  // if last signal was sell, only sell at higher price
+                  s.signal = 'sell'
+                  s.last_signal = 'sell'
+                }
               }
               s.trend = 'down'
             }
@@ -71,7 +75,11 @@ module.exports = {
               //time to buy
               if (s.lookback[0].rsi < s.options.max_buy_rsi) {
                 // only buy if RSI < max_buy_rsi
-                s.signal = 'buy'
+                if ((s.last_signal === 'buy' && s.lookback[0].close > s.period.close) || s.last_signal !== 'buy') {
+                  // if last signal was buy, only buy if cheaper
+                  s.signal = 'buy'
+                  s.last_signal = 'buy'
+                }
               }
               s.trend = 'up'
             }
