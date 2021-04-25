@@ -19,6 +19,8 @@ module.exports = {
     this.option('rsi_drop', 'allow RSI to fall this many points before selling', Number, 1)
     this.option('rsi_divisor', 'sell when RSI reaches high-water reading divided by this value', Number, 2)
 	  this.option('flat_tolerance', 'Difference from when the price is considered to be rising or falling', Number, 0)
+    this.option('flash_sale', 'if RSI is under this value, buy!', Number, 15)
+    this.option('super_offer', 'if RSI is over this value, sell!', Number, 85)
   },
 
   calculate: function (s) {
@@ -29,6 +31,11 @@ module.exports = {
     if (!s.in_preroll) {
       // calculate trend
       if (typeof s.period.rsi === 'number') {
+        if (s.period.rsi < s.options.flash_sale) {
+          s.signal = 'buy'
+        } else if (s.period.rsi > s.options.super_offer) {
+          s.signal = 'sell'
+        }
    
         switch (s.trend) {
           case 'rising':
