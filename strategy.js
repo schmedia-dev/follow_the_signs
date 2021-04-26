@@ -34,8 +34,12 @@ module.exports = {
       if (typeof s.period.rsi === 'number') {
         if (s.period.rsi < s.options.flash_sale) {
           s.signal = 'buy'
+          s.last_signal = 'buy'
+          s.last_price = s.period.close
         } else if (s.period.rsi > s.options.super_offer) {
           s.signal = 'sell'
+          s.last_signal = 'sell'
+          s.last_price = s.period.close
         }
    
         switch (s.trend) {
@@ -103,6 +107,10 @@ module.exports = {
             break
           case 'flat':
           default:
+            if (s.last_price === 'undefined')
+              s.last_price = s.period.close
+            if (s.last_signal === 'undefined')
+              s.last_signal = 'sell'
             if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
               s.trend = 'up'
             }
