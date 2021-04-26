@@ -21,7 +21,7 @@ module.exports = {
 	  this.option('flat_tolerance', 'Difference from when the price is considered to be rising or falling', Number, 0)
     this.option('flash_sale', 'if RSI is under this value, buy!', Number, 15)
     this.option('super_offer', 'if RSI is over this value, sell!', Number, 85)
-    this.option('fees', 'the standard fees at binance are 0.1%', Decimal, 0.001)
+    this.option('fees', 'the standard fees at binance are 0.1% (1/1000)', Number, 1000)
   },
 
   calculate: function (s) {
@@ -55,7 +55,7 @@ module.exports = {
               if (s.lookback[0].rsi > s.options.min_sell_rsi) {
                 // but only sell if RSI > min_sell_rsi
                 if ((s.last_signal === 'sell' && s.last_price < s.period.close) || 
-                    (s.last_signal === 'buy' && (s.period.close - s.last_price) > s.options.fees * s.period.close)) {
+                    (s.last_signal === 'buy' && (s.period.close - s.last_price) > (s.period.close / s.options.fees))) {
                   // if last signal was sell, only sell at higher price
                   // and if the fees are covered
                   if (s.period.close - s.last_price)
