@@ -92,7 +92,7 @@ module.exports = {
               //time to buy
               if (s.lookback[0].rsi < s.options.max_buy_rsi) {
                 // only buy if RSI < max_buy_rsi
-                if ((s.last_signal === 'buy' && (s.period.close - s.last_price) > (s.period.close / s.options.restock)) || 
+                if ((s.last_signal === 'buy' && (s.last_price - s.period.close) > (s.period.close / s.options.restock)) || 
                      s.last_signal !== 'buy') {
                   // if last signal was buy, only buy if cheaper
                   s.signal = 'buy'
