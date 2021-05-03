@@ -22,6 +22,7 @@ module.exports = {
     this.option('flash_sale', 'if RSI is under this value, buy!', Number, 15)
     this.option('super_offer', 'if RSI is over this value, sell!', Number, 85)
     this.option('fees', 'the standard fees at binance are 0.1% (1/1000)', Number, 1000)
+    this.option('restock', 'restock if 0.5% cheaper (5/1000)', Number, 200)
   },
 
   calculate: function (s) {
@@ -91,7 +92,8 @@ module.exports = {
               //time to buy
               if (s.lookback[0].rsi < s.options.max_buy_rsi) {
                 // only buy if RSI < max_buy_rsi
-                if ((s.last_signal === 'buy' && s.last_price > s.period.close) || s.last_signal !== 'buy') {
+                if ((s.last_signal === 'buy' && (s.period.close - s.last_price) > (s.period.close / s.options.restock)) || 
+                     s.last_signal !== 'buy') {
                   // if last signal was buy, only buy if cheaper
                   s.signal = 'buy'
                   s.last_signal = 'buy'
