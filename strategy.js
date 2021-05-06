@@ -9,18 +9,18 @@ module.exports = {
   description: 'Attempts to buy low and sell high by tracking RSI high-water readings.',
 
   getOptions: function () {
-    this.option('period', 'period length, same as --period_length', String, '2m')
-    this.option('period_length', 'period length, same as --period', String, '2m')
+    this.option('period', 'period length, same as --period_length', String, '1m')
+    this.option('period_length', 'period length, same as --period', String, '1m')
     this.option('min_periods', 'min. number of history periods', Number, 52)
-    this.option('rsi_periods', 'number of RSI periods', Number, 7)
-    this.option('max_buy_rsi', 'only buy when RSI is below this value', Number, 40)
-    this.option('min_sell_rsi', 'will not sell when RSI is under this value', Number, 60)
+    this.option('rsi_periods', 'number of RSI periods', Number, 5)
+    this.option('max_buy_rsi', 'only buy when RSI is below this value', Number, 30)
+    this.option('min_sell_rsi', 'will not sell when RSI is under this value', Number, 70)
     this.option('rsi_recover', 'allow RSI to recover this many points before buying', Number, 1)
     this.option('rsi_drop', 'allow RSI to fall this many points before selling', Number, 1)
     this.option('rsi_divisor', 'sell when RSI reaches high-water reading divided by this value', Number, 2)
 	  this.option('flat_tolerance', 'Difference from when the price is considered to be rising or falling', Number, 1)
-    this.option('flash_sale', 'if RSI is under this value, buy!', Number, 15)
-    this.option('super_offer', 'if RSI is over this value, sell!', Number, 85)
+    this.option('flash_sale', 'if RSI is under this value, buy!', Number, 10)
+    this.option('super_offer', 'if RSI is over this value, sell!', Number, 90)
   },
 
   calculate: function (s) {
