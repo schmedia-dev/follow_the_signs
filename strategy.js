@@ -107,9 +107,9 @@ module.exports = {
             break
           case 'flat':
           default:
-            if (s.last_price === 'undefined')
+            if (typeof s.last_price === 'undefined')
               s.last_price = s.period.close
-            if (s.last_signal === 'undefined')
+            if (typeof s.last_signal === 'undefined')
               s.last_signal = 'sell'
             if (s.period.rsi > s.lookback[0].rsi + s.options.flat_tolerance) {
               s.trend = 'up'
@@ -135,6 +135,7 @@ module.exports = {
         color = 'red'
       }
       cols.push(z(4, n(s.period.rsi).format('0'), ' ')[color])
+      cols.push(z(8, n(s.trend).format('0'), ' ')[color])
     }
     return cols
   },
